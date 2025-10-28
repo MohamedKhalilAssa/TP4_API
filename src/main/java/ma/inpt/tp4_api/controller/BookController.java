@@ -13,11 +13,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import ma.inpt.tp4_api.modal.Book;
 import ma.inpt.tp4_api.service.BookService;
 
 @RestController
 @RequestMapping("/api/v1/books") // Versioning
+@Tag(name = "Books", description = "Book management APIs (v1)")
 public class BookController {
 
     @Autowired
