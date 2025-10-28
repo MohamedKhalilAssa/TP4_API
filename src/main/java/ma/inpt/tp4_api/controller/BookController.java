@@ -1,4 +1,4 @@
-package com.example.demo.controller;
+package ma.inpt.tp4_api.controller;
 
 import java.util.List;
 
@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.demo.modal.Book;
-import com.example.demo.service.BookService;
+import ma.inpt.tp4_api.modal.Book;
+import ma.inpt.tp4_api.service.BookService;
 
 @RestController
 @RequestMapping("/api/v1/books") // Versioning

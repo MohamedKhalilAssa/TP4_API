@@ -1,4 +1,4 @@
-package com.example.demo.modal;
+package ma.inpt.tp4_api.modal;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

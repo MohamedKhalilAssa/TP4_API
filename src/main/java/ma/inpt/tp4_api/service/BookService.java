@@ -1,7 +1,7 @@
-package com.example.demo.service;
+package ma.inpt.tp4_api.service;
 
-import com.example.demo.modal.Book;
-import com.example.demo.repository.BookRepository;
+import ma.inpt.tp4_api.modal.Book;
+import ma.inpt.tp4_api.repository.BookRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
