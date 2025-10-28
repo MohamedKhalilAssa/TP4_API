@@ -41,7 +41,7 @@ public class BookController {
             parameters = {
                 @Parameter(name = "Accept-Language", in = ParameterIn.HEADER,
                         description = "Language preference",
-                        schema = @Schema(type = "string", allowableValues = {"en", "fr", "ar", "es"}, defaultValue = "en")),
+                        schema = @Schema(type = "string", allowableValues = {"en", "fr"}, defaultValue = "en")),
                 @Parameter(name = "Accept-Encoding", in = ParameterIn.HEADER,
                         description = "Compression preference",
                         schema = @Schema(type = "string", allowableValues = {"gzip", "br", "gzip, deflate, br"}, defaultValue = "gzip, deflate, br"))
@@ -59,7 +59,7 @@ public class BookController {
             parameters = {
                 @Parameter(name = "Accept-Language", in = ParameterIn.HEADER,
                         description = "Language preference",
-                        schema = @Schema(type = "string", allowableValues = {"en", "fr", "ar", "es"}, defaultValue = "en")),
+                        schema = @Schema(type = "string", allowableValues = {"en", "fr"}, defaultValue = "en")),
                 @Parameter(name = "Accept-Encoding", in = ParameterIn.HEADER,
                         description = "Compression preference",
                         schema = @Schema(type = "string", allowableValues = {"gzip", "br", "gzip, deflate, br"}, defaultValue = "gzip, deflate, br"))
@@ -78,7 +78,7 @@ public class BookController {
             parameters = {
                 @Parameter(name = "Accept-Language", in = ParameterIn.HEADER,
                         description = "Language preference",
-                        schema = @Schema(type = "string", allowableValues = {"en", "fr", "ar", "es"}, defaultValue = "en")),
+                        schema = @Schema(type = "string", allowableValues = {"en", "fr"}, defaultValue = "en")),
                 @Parameter(name = "Accept-Encoding", in = ParameterIn.HEADER,
                         description = "Compression preference",
                         schema = @Schema(type = "string", allowableValues = {"gzip", "br", "gzip, deflate, br"}, defaultValue = "gzip, deflate, br"))
@@ -96,7 +96,7 @@ public class BookController {
             parameters = {
                 @Parameter(name = "Accept-Language", in = ParameterIn.HEADER,
                         description = "Language preference",
-                        schema = @Schema(type = "string", allowableValues = {"en", "fr", "ar", "es"}, defaultValue = "en")),
+                        schema = @Schema(type = "string", allowableValues = {"en", "fr"}, defaultValue = "en")),
                 @Parameter(name = "Accept-Encoding", in = ParameterIn.HEADER,
                         description = "Compression preference",
                         schema = @Schema(type = "string", allowableValues = {"gzip", "br", "gzip, deflate, br"}, defaultValue = "gzip, deflate, br"))
@@ -118,7 +118,7 @@ public class BookController {
             parameters = {
                 @Parameter(name = "Accept-Language", in = ParameterIn.HEADER,
                         description = "Language preference",
-                        schema = @Schema(type = "string", allowableValues = {"en", "fr", "ar", "es"}, defaultValue = "en")),
+                        schema = @Schema(type = "string", allowableValues = {"en", "fr"}, defaultValue = "en")),
                 @Parameter(name = "Accept-Encoding", in = ParameterIn.HEADER,
                         description = "Compression preference",
                         schema = @Schema(type = "string", allowableValues = {"gzip", "br", "gzip, deflate, br"}, defaultValue = "gzip, deflate, br"))
