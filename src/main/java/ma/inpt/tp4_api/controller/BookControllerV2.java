@@ -1,20 +1,5 @@
 package ma.inpt.tp4_api.controller;
 
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -24,11 +9,17 @@ import ma.inpt.tp4_api.dto.ApiResponse;
 import ma.inpt.tp4_api.modal.Book;
 import ma.inpt.tp4_api.service.BookService;
 import ma.inpt.tp4_api.util.MessageTranslator;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/books") // Versioning
-@Tag(name = "Books", description = "Book management APIs (v1)")
-public class BookController {
+@RequestMapping("/api/v2/books") // Versioning
+@Tag(name = "Books V2", description = "Book management APIs (v2) with i18n support")
+public class BookControllerV2 {
 
     @Autowired
     private BookService bookService;
@@ -84,7 +75,6 @@ public class BookController {
                         schema = @Schema(type = "string", allowableValues = {"gzip", "br", "gzip, deflate, br"}, defaultValue = "gzip, deflate, br"))
             })
     public ResponseEntity<ApiResponse<Book>> createBook(@RequestBody Book book) {
-        // ID will be auto-generated, even if user tries to send one
         Book created = bookService.create(book);
         String message = messageTranslator.getMessage("book.created");
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -103,7 +93,6 @@ public class BookController {
             })
     public ResponseEntity<ApiResponse<Book>> updateBook(@PathVariable Long id, @RequestBody Book book) {
         try {
-            // ID from path variable is used, not from request body
             Book updated = bookService.update(id, book);
             String message = messageTranslator.getMessage("book.updated");
             return ResponseEntity.ok(ApiResponse.success(message, updated));
