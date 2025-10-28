@@ -2,6 +2,7 @@ package ma.inpt.tp4_api.service;
 
 import ma.inpt.tp4_api.modal.Book;
 import ma.inpt.tp4_api.repository.BookRepository;
+import ma.inpt.tp4_api.util.MessageTranslator;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,6 +15,9 @@ public class BookService {
     @Autowired
     private BookRepository bookRepository;
 
+    @Autowired
+    private MessageTranslator messageTranslator;
+
     public List<Book> getAll() {
         return bookRepository.findAll();
     }
@@ -23,16 +27,25 @@ public class BookService {
     }
 
     public Book create(Book book) {
+        // Ensure ID is null so database auto-generates it
+        book.setId(null);
         return bookRepository.save(book);
     }
 
     public Book update(Long id, Book updated) {
-        updated.setId(id);
-        return bookRepository.save(updated);
+        // Check if book exists first
+        return bookRepository.findById(id)
+                .map(existing -> {
+                    // Set the ID from path variable (not from request body)
+                    updated.setId(id);
+                    return bookRepository.save(updated);
+                })
+                .orElseThrow(() -> new RuntimeException(
+                    messageTranslator.getMessage("book.notfound", id)
+                ));
     }
 
     public void delete(Long id) {
         bookRepository.deleteById(id);
     }
 }
-
