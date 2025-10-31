@@ -1,8 +1,10 @@
 package ma.inpt.tp4_api.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -21,6 +23,7 @@ import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import ma.inpt.tp4_api.dto.ApiResponse;
+import ma.inpt.tp4_api.dto.LocalizedBook;
 import ma.inpt.tp4_api.modal.Book;
 import ma.inpt.tp4_api.service.BookService;
 import ma.inpt.tp4_api.util.ETag;
@@ -37,6 +40,9 @@ public class BookController {
     @Autowired
     private MessageTranslator messageTranslator;
 
+    @Autowired
+    private MessageSource messageSource;
+
     @GetMapping
     @Operation(summary = "Get all books", description = "Returns a list of all books with i18n messages and ETag caching",
             parameters = {
@@ -50,7 +56,7 @@ public class BookController {
                         description = "ETag from previous request for caching",
                         schema = @Schema(type = "string"))
             })
-    public ResponseEntity<ApiResponse<List<Book>>> getAllBooks(
+    public ResponseEntity<Map<String, Object>> getAllBooks(
             @RequestHeader(value = "If-None-Match", required = false) String ifNoneMatch) {
 
         List<Book> books = bookService.getAll();
@@ -65,10 +71,14 @@ public class BookController {
             ? messageTranslator.getMessage("book.list.empty")
             : messageTranslator.getMessage("api.success");
 
+        // Convert to localized books
+        List<Map<String, Object>> localizedBooks = LocalizedBook.fromBooks(books, messageSource);
+        ApiResponse<List<Map<String, Object>>> response = ApiResponse.success(message, localizedBooks);
+
         // Return 200 with ETag header
         return ResponseEntity.ok()
                 .eTag(etag)
-                .body(ApiResponse.success(message, books));
+                .body(response.toLocalizedMap(messageSource));
     }
 
     @GetMapping("/{id}")
@@ -84,14 +94,15 @@ public class BookController {
                         description = "ETag from previous request for caching",
                         schema = @Schema(type = "string"))
             })
-    public ResponseEntity<ApiResponse<Book>> getBookById(
+    public ResponseEntity<Map<String, Object>> getBookById(
             @PathVariable Long id,
             @RequestHeader(value = "If-None-Match", required = false) String ifNoneMatch) {
 
         var bookOpt = bookService.getById(id);
         if (bookOpt.isEmpty()) {
+            ApiResponse<Map<String, Object>> response = ApiResponse.error(messageTranslator.getMessage("book.notfound", id));
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(ApiResponse.error(messageTranslator.getMessage("book.notfound", id)));
+                    .body(response.toLocalizedMap(messageSource));
         }
 
         Book book = bookOpt.get();
@@ -104,10 +115,14 @@ public class BookController {
                     .build();
         }
 
+        // Convert to localized book
+        Map<String, Object> localizedBook = LocalizedBook.fromBook(book, messageSource);
+        ApiResponse<Map<String, Object>> response = ApiResponse.success(messageTranslator.getMessage("api.success"), localizedBook);
+
         // Return 200 with ETag header
         return ResponseEntity.ok()
                 .eTag(etag)
-                .body(ApiResponse.success(messageTranslator.getMessage("api.success"), book));
+                .body(response.toLocalizedMap(messageSource));
     }
 
     @PostMapping
@@ -120,12 +135,18 @@ public class BookController {
                         description = "Compression preference",
                         schema = @Schema(type = "string", allowableValues = {"gzip", "br", "gzip, deflate, br"}, defaultValue = "gzip, deflate, br"))
             })
-    public ResponseEntity<ApiResponse<Book>> createBook(@RequestBody Book book) {
+    public ResponseEntity<Map<String, Object>> createBook(@RequestBody Book book) {
         // ID will be auto-generated, even if user tries to send one
+        book.setId(null); // Force null to ensure auto-generation
         Book created = bookService.create(book);
         String message = messageTranslator.getMessage("book.created");
+
+        // Convert to localized book
+        Map<String, Object> localizedBook = LocalizedBook.fromBook(created, messageSource);
+        ApiResponse<Map<String, Object>> response = ApiResponse.success(message, localizedBook);
+
         return ResponseEntity.status(HttpStatus.CREATED)
-            .body(ApiResponse.success(message, created));
+            .body(response.toLocalizedMap(messageSource));
     }
 
     @PutMapping("/{id}")
@@ -141,7 +162,7 @@ public class BookController {
                         description = "ETag for optimistic locking (prevents concurrent updates)",
                         schema = @Schema(type = "string"))
             })
-    public ResponseEntity<ApiResponse<Book>> updateBook(
+    public ResponseEntity<Map<String, Object>> updateBook(
             @PathVariable Long id,
             @RequestBody Book book,
             @RequestHeader(value = "If-Match", required = false) String ifMatch) {
@@ -150,8 +171,9 @@ public class BookController {
         if (ifMatch != null) {
             var existingBookOpt = bookService.getById(id);
             if (existingBookOpt.isEmpty()) {
+                ApiResponse<Map<String, Object>> response = ApiResponse.error(messageTranslator.getMessage("book.notfound", id));
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(ApiResponse.error(messageTranslator.getMessage("book.notfound", id)));
+                    .body(response.toLocalizedMap(messageSource));
             }
 
             Book existingBook = existingBookOpt.get();
@@ -159,8 +181,9 @@ public class BookController {
 
             // If ETags don't match, return 412 Precondition Failed
             if (!currentETag.equals(ifMatch)) {
+                ApiResponse<Map<String, Object>> response = ApiResponse.error("ETag mismatch: resource has been modified by another request");
                 return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED)
-                    .body(ApiResponse.error("ETag mismatch: resource has been modified by another request"));
+                    .body(response.toLocalizedMap(messageSource));
             }
         }
 
@@ -170,12 +193,17 @@ public class BookController {
             String newETag = ETag.generateETag(updated);
             String message = messageTranslator.getMessage("book.updated");
 
+            // Convert to localized book
+            Map<String, Object> localizedBook = LocalizedBook.fromBook(updated, messageSource);
+            ApiResponse<Map<String, Object>> response = ApiResponse.success(message, localizedBook);
+
             return ResponseEntity.ok()
                     .eTag(newETag)
-                    .body(ApiResponse.success(message, updated));
+                    .body(response.toLocalizedMap(messageSource));
         } catch (RuntimeException e) {
+            ApiResponse<Map<String, Object>> response = ApiResponse.error(e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(ApiResponse.error(e.getMessage()));
+                .body(response.toLocalizedMap(messageSource));
         }
     }
 
@@ -189,9 +217,16 @@ public class BookController {
                         description = "Compression preference",
                         schema = @Schema(type = "string", allowableValues = {"gzip", "br", "gzip, deflate, br"}, defaultValue = "gzip, deflate, br"))
             })
-    public ResponseEntity<ApiResponse<Void>> deleteBook(@PathVariable Long id) {
-        bookService.delete(id);
-        String message = messageTranslator.getMessage("book.deleted");
-        return ResponseEntity.ok(ApiResponse.success(message, null));
+    public ResponseEntity<Map<String, Object>> deleteBook(@PathVariable Long id) {
+        try {
+            bookService.delete(id);
+            String message = messageTranslator.getMessage("book.deleted");
+            ApiResponse<Map<String, Object>> response = ApiResponse.success(message, null);
+            return ResponseEntity.ok(response.toLocalizedMap(messageSource));
+        } catch (RuntimeException e) {
+            ApiResponse<Map<String, Object>> response = ApiResponse.error(messageTranslator.getMessage("book.notfound", id));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(response.toLocalizedMap(messageSource));
+        }
     }
 }

@@ -7,6 +7,7 @@ import org.springframework.context.support.ReloadableResourceBundleMessageSource
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 
+import java.util.Arrays;
 import java.util.Locale;
 
 /**
@@ -20,6 +21,13 @@ public class LocaleConfig {
     public LocaleResolver localeResolver() {
         AcceptHeaderLocaleResolver localeResolver = new AcceptHeaderLocaleResolver();
         localeResolver.setDefaultLocale(Locale.ENGLISH);
+        // Support only English and French
+        localeResolver.setSupportedLocales(Arrays.asList(
+            Locale.ENGLISH,
+            new Locale("en"),
+            Locale.FRENCH,
+            new Locale("fr")
+        ));
         return localeResolver;
     }
 
@@ -29,7 +37,8 @@ public class LocaleConfig {
         messageSource.setBasename("classpath:i18n/messages");
         messageSource.setDefaultEncoding("UTF-8");
         messageSource.setFallbackToSystemLocale(false);
+        messageSource.setDefaultLocale(Locale.ENGLISH);
+        messageSource.setCacheSeconds(3600); // Cache for 1 hour
         return messageSource;
     }
 }
-
