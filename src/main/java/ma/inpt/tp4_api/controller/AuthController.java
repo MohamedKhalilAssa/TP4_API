@@ -5,6 +5,7 @@ import ma.inpt.tp4_api.dto.LoginRequest;
 import ma.inpt.tp4_api.dto.RegisterRequest;
 import ma.inpt.tp4_api.modal.User;
 import ma.inpt.tp4_api.repository.UserRepository;
+import ma.inpt.tp4_api.service.ValidationService;
 import ma.inpt.tp4_api.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -32,8 +33,20 @@ public class AuthController {
     @Autowired
     private JwtUtil jwtUtil;
 
+    @Autowired
+    private ValidationService validationService;
+
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest registerRequest) {
+        // Validate username
+        validationService.validateUsername(registerRequest.getUsername());
+
+        // Validate email format
+        validationService.validateEmail(registerRequest.getEmail());
+
+        // Validate password strength
+        validationService.validatePassword(registerRequest.getPassword());
+
         // Check if username already exists
         if (userRepository.existsByUsername(registerRequest.getUsername())) {
             return ResponseEntity.badRequest().body("Username is already taken!");
